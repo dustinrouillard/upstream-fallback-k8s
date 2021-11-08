@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-conf
+  labels:
+    name: traefik-conf
+  namespace: traefik
+data:
+  file.yml: |-
+    http:
+      routers:
+        upstream:
+          entryPoints:
+            - https
+          middlewares:
+            - traefik-errors@kubernetescrd
+            - traefik-latency-check@kubernetescrd
+          service: upstream
+          tls: {}
+          rule: HostRegexp(`{host:.+}`)
+      services:
+        upstream:
+          loadBalancer:
+            servers:
+              - url: https://upstream/
+            healthCheck:
+              scheme: http
+              path: /ping
+              port: 8083
+              hostname: upstream-health
+              interval: 30s
+              timeout: 30s
+            passHostHeader: true
+  traefik.yml: |-
+    accesslog: {}
+    log:
+      level: ERROR
+    metrics:
+      prometheus:
+        entryPoint: metrics
+    api:
+      dashboard: true
+    providers:
+      file:
+        filename: /etc/traefik/file.yml
+      kubernetescrd:
+        allowCrossNamespace: true
+    serverstransport:
+      insecureskipverify: true
+    tls:
+      stores:
+        default:
+          defaultCertificate:
+          - certFile: /etc/traefik/ssl/tls.crt
+            keyFile: /etc/traefik/ssl/tls.key
+    entrypoints:
+      https:
+        address: :443
+        forwardedHeaders:
+          trustedIPs:
+          - 103.21.244.0/22
+          - 103.22.200.0/22
+          - 103.31.4.0/22
+          - 104.16.0.0/13
+          - 104.24.0.0/14
+          - 108.162.192.0/18
+          - 131.0.72.0/22
+          - 141.101.64.0/18
+          - 162.158.0.0/15
+          - 172.64.0.0/13
+          - 173.245.48.0/20
+          - 188.114.96.0/20
+          - 190.93.240.0/20
+          - 197.234.240.0/22
+          - 198.41.128.0/17
+          - 2400:cb00::/32
+          - 2606:4700::/32
+          - 2803:f800::/32
+          - 2405:b500::/32
+          - 2405:8100::/32
+          - 2a06:98c0::/29
+          - 2c0f:f248::/32
+        http:
+          middlewares:
+            - traefik-middleware-chain@kubernetescrd
+      metrics:
+        address: :8082
+      ping:
+        address: :8083
+    ping:
+      entryPoint: "ping"
+    experimental:
+      plugins:
+        traefik-real-ip:
+          modulename: github.com/soulbalz/traefik-real-ip
+          version: v1.0.3
+        header-transform:
+          moduleName: "github.com/adyanth/header-transform"
+          version: "v1.0.0"

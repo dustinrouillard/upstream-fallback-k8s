@@ -1,0 +1,21 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: dashboard
+  namespace: traefik
+spec:
+  entryPoints:
+    - https
+  routes:
+    - match: Host(`traefik-axis.rouillard.cloud`)
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
+    - match: Host(`dcs-maintenance.rouillard.cloud`)
+      kind: Rule
+      services:
+        - name: dcs-maintenance
+          namespace: default
+          port: 3000
+  tls: {}

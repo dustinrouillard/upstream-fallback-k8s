@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+
+kind: Deployment
+metadata:
+  name: maintenance
+  labels:
+    app: maintenance
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: maintenance
+  template:
+    metadata:
+      labels:
+        app: maintenance
+    spec:
+      imagePullSecrets:
+        - name: ghcr-creds
+      containers:
+        - name: server
+          imagePullPolicy: Always
+          image: ghcr.io/dustinrouillard/dcs-maintenance-app/server

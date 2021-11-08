@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: traefik-controller
+  namespace: traefik
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: traefik
+  namespace: traefik
+  labels:
+    app: traefik
+  annotations:
+    configmap.reloader.stakater.com/reload: "traefik-conf"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "8082"
+        prometheus.io/scrape: "true"
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik-controller
+
+      volumes:
+        - name: traefik-conf
+          configMap:
+            name: traefik-conf
+
+      containers:
+        - name: traefik
+          image: traefik:v2.5.2
+          volumeMounts:
+            - mountPath: /etc/traefik
+              name: traefik-conf
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8083
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          ports:
+            - name: https
+              containerPort: 443
+            - name: metrics
+              containerPort: 8082
+            - name: ping
+              containerPort: 8083
