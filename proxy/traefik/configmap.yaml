@@ -23,13 +23,13 @@ data:
           loadBalancer:
             servers:
               - url: https://upstream/
-            healthCheck:
-              scheme: http
-              path: /ping
-              port: 8083
-              hostname: upstream-health
-              interval: 30s
-              timeout: 30s
+            # healthCheck:
+            #   scheme: http
+            #   path: /ping
+            #   port: 8083
+            #   hostname: upstream-health
+            #   interval: 30s
+            #   timeout: 30s
             passHostHeader: true
   traefik.yml: |-
     accesslog: {}

@@ -27,7 +27,7 @@ metadata:
 spec:
   ipWhiteList:
     ipStrategy:
-      depth: 2
+      depth: 1
     sourceRange:
       - PROXY.IP.OR.RANGE/24
 
@@ -41,6 +41,7 @@ spec:
   plugin:
     traefik-real-ip:
       excludednets:
+        - PROXY.IP.OR.RANGE/24
         - 103.21.244.0/22
         - 103.22.200.0/22
         - 103.31.4.0/22

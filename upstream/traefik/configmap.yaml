@@ -26,7 +26,6 @@ data:
         address: :443
         forwardedHeaders:
           trustedIPs:
-          - PROXY.IP.OR.RANGE/24
           - 103.21.244.0/22
           - 103.22.200.0/22
           - 103.31.4.0/22
